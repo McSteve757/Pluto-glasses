@@ -54,7 +54,6 @@ html, body {
   background: rgba(0,0,0,.75);
   padding: 8px;
   border-radius: 14px;
-  transition: opacity .25s;
 }
 
 button {
@@ -83,7 +82,7 @@ button {
 </video>
 
 <div id="channelName">
-  LIVE WEATHER TV
+  NBC NEWS NOW
 </div>
 
 <div id="status">
@@ -122,33 +121,27 @@ const controls =
   document.getElementById("controls");
 
 const stream =
-  "https://alwxnet-ott-proxy.cloud9streaming.com/alwxnet/live/playlist.m3u8";
+  "https://d1bl6tskrpq9ze.cloudfront.net/hls/master.m3u8?ads.xumo_channelId=99984003";
 
 
 function startStream() {
 
-  status.innerText =
-    "Loading...";
+  status.innerText = "Loading...";
 
-  player.src =
-    stream;
+  player.src = stream;
 
   player.load();
 
   player.play()
     .catch(function() {
-      status.innerText =
-        "Tap play";
+      status.innerText = "Tap play";
     });
 
 }
 
 
 function toggleSound() {
-
-  player.muted =
-    !player.muted;
-
+  player.muted = !player.muted;
 }
 
 
@@ -164,28 +157,19 @@ function togglePlay() {
 
 
 function reloadStream() {
-
   startStream();
-
 }
 
 
 function hideControls() {
-
-  controls.classList.add(
-    "hidden"
-  );
-
+  controls.classList.add("hidden");
 }
 
 
 player.addEventListener(
   "playing",
   function() {
-
-    status.innerText =
-      "LIVE";
-
+    status.innerText = "LIVE";
   }
 );
 
@@ -193,10 +177,7 @@ player.addEventListener(
 player.addEventListener(
   "waiting",
   function() {
-
-    status.innerText =
-      "Buffering";
-
+    status.innerText = "Buffering";
   }
 );
 
@@ -206,16 +187,11 @@ player.addEventListener(
   function() {
 
     if (player.error) {
-
       status.innerText =
-        "ERROR " +
-        player.error.code;
-
+        "ERROR " + player.error.code;
     } else {
-
       status.innerText =
         "Stream Error";
-
     }
 
   }
@@ -226,22 +202,14 @@ player.addEventListener(
   "click",
   function() {
 
-    controls.classList.remove(
-      "hidden"
-    );
+    controls.classList.remove("hidden");
 
-    clearTimeout(
-      window.hideTimer
-    );
+    clearTimeout(window.hideTimer);
 
     window.hideTimer =
       setTimeout(
         function() {
-
-          controls.classList.add(
-            "hidden"
-          );
-
+          controls.classList.add("hidden");
         },
         3000
       );

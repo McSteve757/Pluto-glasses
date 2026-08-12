@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Meta Music TV</title>
+<title>Meta Live TV</title>
 
 <style>
 html, body {
@@ -24,14 +24,21 @@ html, body {
   background: black;
 }
 
-#channelName {
+#topbar {
   position: fixed;
   top: 8px;
-  left: 10px;
-  background: rgba(0,0,0,.65);
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.badge {
+  background: rgba(0,0,0,.7);
   padding: 6px 10px;
   border-radius: 8px;
-  font-size: 17px;
+  font-size: 15px;
 }
 
 #controls {
@@ -39,39 +46,25 @@ html, body {
   bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-
   display: flex;
   gap: 8px;
-
-  background: rgba(0,0,0,.7);
+  background: rgba(0,0,0,.75);
   padding: 8px;
   border-radius: 14px;
-
-  transition: opacity .25s;
 }
 
 button {
   border: 1px solid white;
   background: #222;
   color: white;
-  font-size: 17px;
-  padding: 12px 14px;
+  padding: 12px 15px;
   border-radius: 10px;
+  font-size: 17px;
 }
 
 .hidden {
   opacity: 0;
   pointer-events: none;
-}
-
-#status {
-  position: fixed;
-  top: 8px;
-  right: 10px;
-  font-size: 14px;
-  background: rgba(0,0,0,.65);
-  padding: 6px 8px;
-  border-radius: 8px;
 }
 </style>
 </head>
@@ -85,19 +78,12 @@ button {
   playsinline>
 </video>
 
-<div id="channelName">
-  VEVO HIP-HOP
-</div>
-
-<div id="status">
-  Loading...
+<div id="topbar">
+  <div id="channel" class="badge">HLS TEST</div>
+  <div id="status" class="badge">Loading...</div>
 </div>
 
 <div id="controls">
-
-  <button onclick="previousChannel()">
-    ◀ CH
-  </button>
 
   <button onclick="toggleSound()">
     🔊
@@ -107,8 +93,8 @@ button {
     ⏯
   </button>
 
-  <button onclick="nextChannel()">
-    CH ▶
+  <button onclick="reloadStream()">
+    ↻
   </button>
 
   <button onclick="hideControls()">
@@ -122,82 +108,45 @@ button {
 const player =
   document.getElementById("player");
 
-const channelName =
-  document.getElementById("channelName");
+const status =
+  document.getElementById("status");
 
 const controls =
   document.getElementById("controls");
 
-const status =
-  document.getElementById("status");
+const channel =
+  document.getElementById("channel");
+
+/*
+KNOWN WORKING BASELINE
+You already confirmed this works
+on your Meta Display.
+*/
+
+let stream =
+"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
 
-const channels = [
+function loadStream(url, name) {
 
-  {
-    name: "VEVO HIP-HOP",
-    url:
-    "https://vevo-hiphop-1.roku.wurl.com/manifest/playlist.m3u8"
-  },
-
-  {
-    name: "VEVO R&B",
-    url:
-    "https://vevo-rnb-1.roku.wurl.com/manifest/playlist.m3u8"
-  }
-
-];
-
-
-let currentChannel = 0;
-
-
-function loadChannel(index) {
-
-  currentChannel = index;
-
-  channelName.innerText =
-    channels[index].name;
+  channel.innerText =
+    name || "LIVE TV";
 
   status.innerText =
     "Loading...";
 
   player.src =
-    channels[index].url;
+    url;
 
   player.load();
 
   player.play()
-    .catch(() => {});
+    .catch(function(error) {
 
-}
+      status.innerText =
+        "Tap PLAY";
 
-
-function nextChannel() {
-
-  let next =
-    currentChannel + 1;
-
-  if (next >= channels.length) {
-    next = 0;
-  }
-
-  loadChannel(next);
-
-}
-
-
-function previousChannel() {
-
-  let previous =
-    currentChannel - 1;
-
-  if (previous < 0) {
-    previous =
-      channels.length - 1;
-  }
-
-  loadChannel(previous);
+    });
 
 }
 
@@ -213,11 +162,24 @@ function toggleSound() {
 function togglePlay() {
 
   if (player.paused) {
+
     player.play();
-  }
-  else {
+
+  } else {
+
     player.pause();
+
   }
+
+}
+
+
+function reloadStream() {
+
+  loadStream(
+    stream,
+    channel.innerText
+  );
 
 }
 
@@ -245,7 +207,7 @@ player.addEventListener(
   function() {
 
     status.innerText =
-      "Buffering...";
+      "Buffering";
 
   }
 );
@@ -255,8 +217,20 @@ player.addEventListener(
   "error",
   function() {
 
-    status.innerText =
-      "Stream Error";
+    const err =
+      player.error;
+
+    if (err) {
+
+      status.innerText =
+        "ERROR " + err.code;
+
+    } else {
+
+      status.innerText =
+        "STREAM ERROR";
+
+    }
 
   }
 );
@@ -266,7 +240,9 @@ player.addEventListener(
   "click",
   function() {
 
-    controls.classList.remove("hidden");
+    controls.classList.remove(
+      "hidden"
+    );
 
     clearTimeout(
       window.hideTimer
@@ -276,7 +252,9 @@ player.addEventListener(
       setTimeout(
         function() {
 
-          controls.classList.add("hidden");
+          controls.classList.add(
+            "hidden"
+          );
 
         },
         3000
@@ -286,7 +264,10 @@ player.addEventListener(
 );
 
 
-loadChannel(0);
+loadStream(
+  stream,
+  "HLS TEST"
+);
 
 </script>
 

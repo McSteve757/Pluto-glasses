@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Meta Live TV</title>
+<title>Meta Music TV</title>
 
 <style>
 html, body {
@@ -12,8 +12,9 @@ html, body {
   width: 100%;
   height: 100%;
   background: black;
-  overflow: hidden;
+  color: white;
   font-family: Arial, sans-serif;
+  overflow: hidden;
 }
 
 #player {
@@ -23,46 +24,54 @@ html, body {
   background: black;
 }
 
-#controls {
-  position: fixed;
-  left: 50%;
-  bottom: 12px;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-
-  background: rgba(0,0,0,.65);
-  padding: 8px;
-  border-radius: 14px;
-
-  transition: opacity .3s;
-}
-
-button {
-  border: 1px solid white;
-  background: rgba(30,30,30,.9);
-  color: white;
-
-  font-size: 17px;
-  padding: 12px 16px;
-  border-radius: 10px;
-}
-
-#channel {
+#channelName {
   position: fixed;
   top: 8px;
-  left: 12px;
-
-  color: white;
-  background: rgba(0,0,0,.6);
+  left: 10px;
+  background: rgba(0,0,0,.65);
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 17px;
 }
 
+#controls {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 8px;
+
+  background: rgba(0,0,0,.7);
+  padding: 8px;
+  border-radius: 14px;
+
+  transition: opacity .25s;
+}
+
+button {
+  border: 1px solid white;
+  background: #222;
+  color: white;
+  font-size: 17px;
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
 .hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+#status {
+  position: fixed;
+  top: 8px;
+  right: 10px;
+  font-size: 14px;
+  background: rgba(0,0,0,.65);
+  padding: 6px 8px;
+  border-radius: 8px;
 }
 </style>
 </head>
@@ -76,22 +85,34 @@ button {
   playsinline>
 </video>
 
-<div id="channel">
-  DW English • LIVE
+<div id="channelName">
+  VEVO HIP-HOP
+</div>
+
+<div id="status">
+  Loading...
 </div>
 
 <div id="controls">
 
-  <button onclick="togglePlay()">
-    ⏯
+  <button onclick="previousChannel()">
+    ◀ CH
   </button>
 
   <button onclick="toggleSound()">
     🔊
   </button>
 
+  <button onclick="togglePlay()">
+    ⏯
+  </button>
+
+  <button onclick="nextChannel()">
+    CH ▶
+  </button>
+
   <button onclick="hideControls()">
-    ⛶ VIDEO
+    ⛶
   </button>
 
 </div>
@@ -101,11 +122,92 @@ button {
 const player =
   document.getElementById("player");
 
+const channelName =
+  document.getElementById("channelName");
+
 const controls =
   document.getElementById("controls");
 
-player.src =
-"https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/master.m3u8";
+const status =
+  document.getElementById("status");
+
+
+const channels = [
+
+  {
+    name: "VEVO HIP-HOP",
+    url:
+    "https://vevo-hiphop-1.roku.wurl.com/manifest/playlist.m3u8"
+  },
+
+  {
+    name: "VEVO R&B",
+    url:
+    "https://vevo-rnb-1.roku.wurl.com/manifest/playlist.m3u8"
+  }
+
+];
+
+
+let currentChannel = 0;
+
+
+function loadChannel(index) {
+
+  currentChannel = index;
+
+  channelName.innerText =
+    channels[index].name;
+
+  status.innerText =
+    "Loading...";
+
+  player.src =
+    channels[index].url;
+
+  player.load();
+
+  player.play()
+    .catch(() => {});
+
+}
+
+
+function nextChannel() {
+
+  let next =
+    currentChannel + 1;
+
+  if (next >= channels.length) {
+    next = 0;
+  }
+
+  loadChannel(next);
+
+}
+
+
+function previousChannel() {
+
+  let previous =
+    currentChannel - 1;
+
+  if (previous < 0) {
+    previous =
+      channels.length - 1;
+  }
+
+  loadChannel(previous);
+
+}
+
+
+function toggleSound() {
+
+  player.muted =
+    !player.muted;
+
+}
 
 
 function togglePlay() {
@@ -120,14 +222,6 @@ function togglePlay() {
 }
 
 
-function toggleSound() {
-
-  player.muted =
-    !player.muted;
-
-}
-
-
 function hideControls() {
 
   controls.classList.add("hidden");
@@ -135,7 +229,38 @@ function hideControls() {
 }
 
 
-// tap video to bring controls back
+player.addEventListener(
+  "playing",
+  function() {
+
+    status.innerText =
+      "LIVE";
+
+  }
+);
+
+
+player.addEventListener(
+  "waiting",
+  function() {
+
+    status.innerText =
+      "Buffering...";
+
+  }
+);
+
+
+player.addEventListener(
+  "error",
+  function() {
+
+    status.innerText =
+      "Stream Error";
+
+  }
+);
+
 
 player.addEventListener(
   "click",
@@ -148,14 +273,20 @@ player.addEventListener(
     );
 
     window.hideTimer =
-      setTimeout(function() {
+      setTimeout(
+        function() {
 
-        controls.classList.add("hidden");
+          controls.classList.add("hidden");
 
-      }, 3000);
+        },
+        3000
+      );
 
   }
 );
+
+
+loadChannel(0);
 
 </script>
 

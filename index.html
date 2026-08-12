@@ -24,21 +24,24 @@ html, body {
   background: black;
 }
 
-#topbar {
+#channelName {
   position: fixed;
   top: 8px;
-  left: 8px;
-  right: 8px;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-.badge {
+  left: 10px;
   background: rgba(0,0,0,.7);
   padding: 6px 10px;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 16px;
+}
+
+#status {
+  position: fixed;
+  top: 8px;
+  right: 10px;
+  background: rgba(0,0,0,.7);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
 #controls {
@@ -51,15 +54,16 @@ html, body {
   background: rgba(0,0,0,.75);
   padding: 8px;
   border-radius: 14px;
+  transition: opacity .25s;
 }
 
 button {
   border: 1px solid white;
   background: #222;
   color: white;
-  padding: 12px 15px;
+  font-size: 18px;
+  padding: 12px 16px;
   border-radius: 10px;
-  font-size: 17px;
 }
 
 .hidden {
@@ -78,9 +82,12 @@ button {
   playsinline>
 </video>
 
-<div id="topbar">
-  <div id="channel" class="badge">HLS TEST</div>
-  <div id="status" class="badge">Loading...</div>
+<div id="channelName">
+  ABC NEWS LIVE
+</div>
+
+<div id="status">
+  Loading...
 </div>
 
 <div id="controls">
@@ -114,38 +121,24 @@ const status =
 const controls =
   document.getElementById("controls");
 
-const channel =
-  document.getElementById("channel");
-
-/*
-KNOWN WORKING BASELINE
-You already confirmed this works
-on your Meta Display.
-*/
-
-let stream =
-"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+const stream =
+  "https://abcnews-streams.akamaized.net/hls/live/2023560/abcnews1/master.m3u8";
 
 
-function loadStream(url, name) {
-
-  channel.innerText =
-    name || "LIVE TV";
+function startStream() {
 
   status.innerText =
     "Loading...";
 
   player.src =
-    url;
+    stream;
 
   player.load();
 
   player.play()
-    .catch(function(error) {
-
+    .catch(function() {
       status.innerText =
-        "Tap PLAY";
-
+        "Tap play";
     });
 
 }
@@ -176,17 +169,16 @@ function togglePlay() {
 
 function reloadStream() {
 
-  loadStream(
-    stream,
-    channel.innerText
-  );
+  startStream();
 
 }
 
 
 function hideControls() {
 
-  controls.classList.add("hidden");
+  controls.classList.add(
+    "hidden"
+  );
 
 }
 
@@ -217,18 +209,16 @@ player.addEventListener(
   "error",
   function() {
 
-    const err =
-      player.error;
-
-    if (err) {
+    if (player.error) {
 
       status.innerText =
-        "ERROR " + err.code;
+        "ERROR " +
+        player.error.code;
 
     } else {
 
       status.innerText =
-        "STREAM ERROR";
+        "Stream Error";
 
     }
 
@@ -264,10 +254,7 @@ player.addEventListener(
 );
 
 
-loadStream(
-  stream,
-  "HLS TEST"
-);
+startStream();
 
 </script>
 

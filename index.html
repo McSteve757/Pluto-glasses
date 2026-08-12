@@ -1,111 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pluto Compatibility Test</title>
 
-<title>Pluto Glass Controls Test</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
 
-<style>
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background: black;
-  color: white;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
-}
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
 
-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
+    h2 {
+      margin: 5px 0 15px;
+    }
 
-h1 {
-  font-size: 24px;
-  margin: 8px 0;
-}
+    iframe {
+      width: 92%;
+      height: 65%;
+      border: 2px solid white;
+      border-radius: 10px;
+      background: black;
+    }
 
-video {
-  width: 80%;
-  height: 180px;
-  object-fit: contain;
-  background: #111;
-}
-
-.controls {
-  width: 90%;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-button {
-  font-size: 18px;
-  padding: 14px 18px;
-  min-width: 120px;
-  border: 2px solid white;
-  border-radius: 12px;
-  background: #222;
-  color: white;
-}
-
-button:focus {
-  background: white;
-  color: black;
-}
-
-#status {
-  font-size: 16px;
-  margin-top: 8px;
-}
-</style>
+    #status {
+      margin-top: 12px;
+      font-size: 18px;
+    }
+  </style>
 </head>
 
 <body>
 
-<h1>PLUTO GLASS TEST</h1>
+<h2>PLUTO TEST</h2>
 
-<video
-  id="player"
-  autoplay
-  muted
-  playsinline>
-</video>
+<iframe
+  id="plutoFrame"
+  src="https://pluto.tv/us/live-tv"
+  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+  referrerpolicy="origin">
+</iframe>
 
-<div class="controls">
-  <button onclick="togglePlay()">PLAY / PAUSE</button>
-  <button onclick="toggleSound()">SOUND</button>
-</div>
-
-<div id="status">Ready</div>
+<div id="status">Testing Pluto Live TV...</div>
 
 <script>
-const player = document.getElementById("player");
-const status = document.getElementById("status");
+  const frame = document.getElementById("plutoFrame");
 
-player.src =
-"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
-
-function togglePlay() {
-  if (player.paused) {
-    player.play();
-    status.innerText = "PLAYING";
-  } else {
-    player.pause();
-    status.innerText = "PAUSED";
-  }
-}
-
-function toggleSound() {
-  player.muted = !player.muted;
-  status.innerText =
-    player.muted ? "MUTED" : "SOUND ON";
-}
+  frame.addEventListener("load", () => {
+    document.getElementById("status").innerText =
+      "Pluto page loaded";
+  });
 </script>
 
 </body>

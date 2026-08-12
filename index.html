@@ -1,93 +1,156 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HLS Test</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+<title>Pluto Glass Player</title>
 
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
+<style>
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    color: white;
+    font-family: Arial, sans-serif;
+}
 
-    video {
-      width: 95%;
-      max-height: 75vh;
-      background: black;
-    }
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
-    h2 {
-      margin-bottom: 15px;
-    }
+video {
+    width: 95%;
+    max-height: 62vh;
+    background: black;
+}
 
-    #status {
-      margin-top: 12px;
-      font-size: 18px;
-    }
-  </style>
+.controls {
+    display: flex;
+    gap: 14px;
+    margin-top: 15px;
+}
+
+button {
+    font-size: 22px;
+    padding: 18px 24px;
+    min-width: 135px;
+    border-radius: 14px;
+    border: 2px solid white;
+    background: #222;
+    color: white;
+}
+
+button:focus {
+    outline: 4px solid white;
+    background: #555;
+}
+
+#status {
+    margin-top: 12px;
+    font-size: 18px;
+}
+</style>
 </head>
 
 <body>
 
-  <h2>LIVE STREAM TEST</h2>
+<h2>PLUTO GLASS</h2>
 
-  <video
-    id="video"
-    controls
+<video
+    id="player"
     autoplay
     muted
     playsinline>
-  </video>
+</video>
 
-  <div id="status">Loading HLS stream...</div>
+<div class="controls">
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<button id="playButton" onclick="togglePlay()">
+    ⏯ PLAY
+</button>
 
-  <script>
-    const video = document.getElementById('video');
-    const status = document.getElementById('status');
+<button id="soundButton" onclick="toggleSound()">
+    🔇 SOUND
+</button>
 
-    const stream =
-      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+</div>
 
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+<div id="status">
+LIVE • Native HLS
+</div>
 
-      video.src = stream;
-      status.innerText = 'Native HLS supported';
+<script>
 
-    } else if (Hls.isSupported()) {
+const player = document.getElementById("player");
 
-      const hls = new Hls();
-      hls.loadSource(stream);
-      hls.attachMedia(video);
+const playButton =
+document.getElementById("playButton");
 
-      hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        status.innerText = 'HLS.js supported';
-        video.play();
-      });
+const soundButton =
+document.getElementById("soundButton");
 
-      hls.on(Hls.Events.ERROR, function (event, data) {
-        status.innerText = 'HLS ERROR: ' + data.type;
-      });
+const status =
+document.getElementById("status");
+
+player.src =
+"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+
+
+function togglePlay() {
+
+    if (player.paused) {
+
+        player.play();
+
+        playButton.innerText =
+        "⏸ PAUSE";
+
+        status.innerText =
+        "PLAYING";
 
     } else {
 
-      status.innerText = 'HLS NOT SUPPORTED';
+        player.pause();
+
+        playButton.innerText =
+        "▶ PLAY";
+
+        status.innerText =
+        "PAUSED";
 
     }
-  </script>
+}
+
+
+function toggleSound() {
+
+    player.muted = !player.muted;
+
+    if (player.muted) {
+
+        soundButton.innerText =
+        "🔇 SOUND";
+
+        status.innerText =
+        "MUTED";
+
+    } else {
+
+        soundButton.innerText =
+        "🔊 MUTE";
+
+        status.innerText =
+        "SOUND ON";
+
+    }
+}
+
+</script>
 
 </body>
 </html>

@@ -28,7 +28,7 @@ html, body {
   position: fixed;
   top: 8px;
   left: 10px;
-  background: rgba(0,0,0,.7);
+  background: rgba(0,0,0,.72);
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 16px;
@@ -38,7 +38,7 @@ html, body {
   position: fixed;
   top: 8px;
   right: 10px;
-  background: rgba(0,0,0,.7);
+  background: rgba(0,0,0,.72);
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 14px;
@@ -54,6 +54,7 @@ html, body {
   background: rgba(0,0,0,.75);
   padding: 8px;
   border-radius: 14px;
+  transition: opacity .25s;
 }
 
 button {
@@ -82,94 +83,172 @@ button {
 </video>
 
 <div id="channelName">
-  NBC NEWS NOW
+  PLAYER TEST
 </div>
 
 <div id="status">
-  Loading...
+  Starting...
 </div>
 
 <div id="controls">
-
-  <button onclick="toggleSound()">
-    🔊
-  </button>
-
-  <button onclick="togglePlay()">
-    ⏯
-  </button>
-
-  <button onclick="reloadStream()">
-    ↻
-  </button>
-
-  <button onclick="hideControls()">
-    ⛶
-  </button>
-
+  <button onclick="toggleSound()">🔊</button>
+  <button onclick="togglePlay()">⏯</button>
+  <button onclick="reloadStream()">↻</button>
+  <button onclick="hideControls()">⛶</button>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 
 <script>
 
-const player =
-  document.getElementById("player");
+const player = document.getElementById("player");
+const status = document.getElementById("status");
+const controls = document.getElementById("controls");
 
-const status =
-  document.getElementById("status");
-
-const controls =
-  document.getElementById("controls");
-
+/*
+THIS IS THE STREAM YOU ALREADY CONFIRMED
+WORKS ON YOUR META DISPLAY.
+*/
 const stream =
-  "https://d1bl6tskrpq9ze.cloudfront.net/hls/master.m3u8?ads.xumo_channelId=99984003";
+"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
+let hls = null;
 
 function startStream() {
 
   status.innerText = "Loading...";
 
-  player.src = stream;
+  if (hls) {
+    hls.destroy();
+    hls = null;
+  }
 
-  player.load();
+  /*
+  FIRST: use native HLS if available.
+  Your glasses already proved this works.
+  */
+  if (
+    player.canPlayType(
+      "application/vnd.apple.mpegurl"
+    )
+  ) {
 
-  player.play()
-    .catch(function() {
-      status.innerText = "Tap play";
-    });
+    status.innerText =
+      "Native HLS";
+
+    player.src = stream;
+
+    player.load();
+
+    player.play()
+      .catch(function() {
+        status.innerText =
+          "Tap Play";
+      });
+
+  }
+
+  /*
+  SECOND: fallback to hls.js
+  if native HLS is unavailable.
+  */
+  else if (Hls.isSupported()) {
+
+    status.innerText =
+      "HLS.js";
+
+    hls = new Hls();
+
+    hls.loadSource(stream);
+
+    hls.attachMedia(player);
+
+    hls.on(
+      Hls.Events.MANIFEST_PARSED,
+      function() {
+
+        status.innerText =
+          "HLS.js Ready";
+
+        player.play()
+          .catch(function() {
+            status.innerText =
+              "Tap Play";
+          });
+
+      }
+    );
+
+    hls.on(
+      Hls.Events.ERROR,
+      function(event, data) {
+
+        status.innerText =
+          "HLS ERROR";
+
+        console.log(data);
+
+      }
+    );
+
+  }
+
+  else {
+
+    status.innerText =
+      "HLS Unsupported";
+
+  }
 
 }
 
 
 function toggleSound() {
-  player.muted = !player.muted;
+
+  player.muted =
+    !player.muted;
+
 }
 
 
 function togglePlay() {
 
   if (player.paused) {
+
     player.play();
+
   } else {
+
     player.pause();
+
   }
 
 }
 
 
 function reloadStream() {
+
   startStream();
+
 }
 
 
 function hideControls() {
-  controls.classList.add("hidden");
+
+  controls.classList.add(
+    "hidden"
+  );
+
 }
 
 
 player.addEventListener(
   "playing",
   function() {
-    status.innerText = "LIVE";
+
+    status.innerText =
+      "PLAYING";
+
   }
 );
 
@@ -177,22 +256,9 @@ player.addEventListener(
 player.addEventListener(
   "waiting",
   function() {
-    status.innerText = "Buffering";
-  }
-);
 
-
-player.addEventListener(
-  "error",
-  function() {
-
-    if (player.error) {
-      status.innerText =
-        "ERROR " + player.error.code;
-    } else {
-      status.innerText =
-        "Stream Error";
-    }
+    status.innerText =
+      "BUFFERING";
 
   }
 );
@@ -202,14 +268,22 @@ player.addEventListener(
   "click",
   function() {
 
-    controls.classList.remove("hidden");
+    controls.classList.remove(
+      "hidden"
+    );
 
-    clearTimeout(window.hideTimer);
+    clearTimeout(
+      window.hideTimer
+    );
 
     window.hideTimer =
       setTimeout(
         function() {
-          controls.classList.add("hidden");
+
+          controls.classList.add(
+            "hidden"
+          );
+
         },
         3000
       );

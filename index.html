@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Video Test</title>
+  <title>HLS Test</title>
 
   <style>
     html, body {
@@ -18,32 +18,76 @@
     body {
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
     }
 
     video {
-      width: 90%;
-      max-height: 70vh;
-      background: #111;
+      width: 95%;
+      max-height: 75vh;
+      background: black;
     }
 
     h2 {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+    }
+
+    #status {
+      margin-top: 12px;
+      font-size: 18px;
     }
   </style>
 </head>
 
 <body>
 
-  <h2>VIDEO PLAYBACK TEST</h2>
+  <h2>LIVE STREAM TEST</h2>
 
-  <video controls autoplay muted playsinline>
-    <source
-      src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
-      type="video/mp4">
-    Your browser does not support HTML5 video.
+  <video
+    id="video"
+    controls
+    autoplay
+    muted
+    playsinline>
   </video>
+
+  <div id="status">Loading HLS stream...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <script>
+    const video = document.getElementById('video');
+    const status = document.getElementById('status');
+
+    const stream =
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+
+      video.src = stream;
+      status.innerText = 'Native HLS supported';
+
+    } else if (Hls.isSupported()) {
+
+      const hls = new Hls();
+      hls.loadSource(stream);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        status.innerText = 'HLS.js supported';
+        video.play();
+      });
+
+      hls.on(Hls.Events.ERROR, function (event, data) {
+        status.innerText = 'HLS ERROR: ' + data.type;
+      });
+
+    } else {
+
+      status.innerText = 'HLS NOT SUPPORTED';
+
+    }
+  </script>
 
 </body>
 </html>
